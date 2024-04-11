@@ -18,6 +18,8 @@ public class ThirdPersonCamera : MonoBehaviour
     //the layermask to look for when avoiding objects
     [SerializeField] private LayerMask avoidLayer;
 
+    [SerializeField] private float scopeZoomSpeed;
+
     //track our ideal and our actual camera zoom
     private float idealCameraZoom;
     private float currentCameraZoom;
@@ -72,6 +74,18 @@ public class ThirdPersonCamera : MonoBehaviour
         {
             currentCameraZoom = cameraZoom;
         }
-        cameraTransform.localPosition = new Vector3(0, 0, -currentCameraZoom);
+        Vector3 cameraTargetPosition = new Vector3();
+
+        if (Input.GetButton("Scope"))
+        {
+            cameraTargetPosition = Vector3.MoveTowards(cameraTransform.localPosition,new Vector3(1,0, -cameraZoom/10), scopeZoomSpeed * Time.deltaTime);
+        }
+        else
+        {
+            cameraTargetPosition = Vector3.MoveTowards(cameraTransform.localPosition,new (0, 0, -currentCameraZoom), scopeZoomSpeed *Time.deltaTime);
+        }
+
+        cameraTransform.localPosition = cameraTargetPosition;
+        
     }
 }

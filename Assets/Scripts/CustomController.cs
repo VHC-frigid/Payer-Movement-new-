@@ -8,12 +8,30 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class CustomController : MonoBehaviour
 {
+    public enum State
+    {
+
+        Idel,
+        Walk,
+        Jump,
+        Grapple
+
+    }
+
+    [SerializeField] private State currentState;
+
     [SerializeField] private float walkSpeed;
     [SerializeField] private float runSpeed;
     [SerializeField] private float crouchSpeed;
     [SerializeField] private float jumpPower;
     [SerializeField] private float gravity;
     [SerializeField] private LayerMask groundMask;
+
+    [SerializeField] private float maxGrappleSpeed = 80;
+
+    private float currentGrappleSpeed;
+
+    private Vector3 grapplePoint = new Vector3();
     //how close to the ground we need to be, to be "grounded"
     [SerializeField] private float groudedAllowance;
     //the angle in degrees we're allowed to walk up
@@ -34,58 +52,171 @@ public class CustomController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         cameraSwapper = GetComponent<CameraSwapper>();
+        NextState();
     }
+
+    private void NextState()
+    {
+
+        switch (currentState)
+        {
+            case State.Idel:
+                StartCoroutine("IdleState");
+                break;
+            case State.Walk:
+                StartCoroutine("WalkState");
+                break;
+            case State.Jump:
+                StartCoroutine("JumpState");
+                break;
+            case State.Grapple:
+                StartCoroutine("GrappleState");
+                break;
+        }
+
+    }
+
+    private void ChangeState(State newState)
+    {
+        currentState = newState;
+    }
+
+    private void AscendAt(float speed)
+    {
+        verticalSpeed = speed;
+        ChangeState(State.Jump);
+    }
+
+    #region State Coroutines
+    IEnumerator IdleState()
+    {
+        //Enter idle
+        Move(Vector3.zero);
+        while (currentState == State.Idel)
+        {
+            //while in Idle
+            if (!IsGrounded())
+            {
+                ChangeState(State.Jump);
+            }
+            else
+            {
+                if (inputThisFrame.magnitude != 0)
+                {
+                    ChangeState(State.Walk);
+                }
+                if (Input.GetButton("Jump"))
+                {
+                    AscendAt(jumpPower);
+                }
+            }
+            yield return null;
+        }
+        //Exit Idle
+
+        NextState();
+    }
+    IEnumerator WalkState()
+    {
+
+        while (currentState == State.Walk)
+        {
+            movementThisFrame = new();
+
+            movementThisFrame.x = inputThisFrame.x;
+            movementThisFrame.z = inputThisFrame.y;
+
+            float speedThisFrame = walkSpeed;
+
+            if (Input.GetButton("Sprint"))
+            {
+                speedThisFrame = runSpeed;
+            }
+            if (Input.GetButton("Crouch"))
+            {
+                speedThisFrame = crouchSpeed;
+            }
+
+            movementThisFrame = TransformDirection(movementThisFrame);
+
+            if (inputThisFrame.magnitude > 0 && ValidateDirection(movementThisFrame))
+            {
+                horizontalSpeed = Mathf.MoveTowards(horizontalSpeed, speedThisFrame, runSpeed * Time.deltaTime);
+            }
+            else
+            {
+                horizontalSpeed = Mathf.MoveTowards(horizontalSpeed, 0, runSpeed * Time.deltaTime);
+            }
+
+            movementThisFrame *= horizontalSpeed;
+
+            if (IsGrounded())
+            {
+                if (Input.GetButton("Jump"))
+                {
+                    AscendAt(jumpPower);
+                }
+            }
+            else
+            {
+                ChangeState(State.Jump);
+            }
+
+            Move(movementThisFrame);
+
+            yield return null;
+        }
+
+        NextState();
+    }
+    IEnumerator JumpState()
+    {
+
+        while (currentState == State.Jump)
+        {
+
+            movementThisFrame = new Vector3(inputThisFrame.x, 0, inputThisFrame.y);
+            movementThisFrame *= horizontalSpeed;
+
+            movementThisFrame = TransformDirection(movementThisFrame);
+
+            verticalSpeed -= gravity * Time.deltaTime;
+            movementThisFrame.y = verticalSpeed;
+
+            Move(movementThisFrame);
+
+            if(IsGrounded() && verticalSpeed < 0)
+            {
+                ChangeState(State.Walk);
+            }
+
+            yield return null;
+        }
+
+        NextState();
+    }
+    IEnumerator GrappleState()
+    {
+
+        while (currentState == State.Grapple)
+        {
+
+
+
+            yield return null;
+        }
+
+        NextState();
+    }
+
+    #endregion
 
     // Update is called once per frame
     void Update()
     {
         inputThisFrame = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         inputThisFrame.Normalize(); //changes inputThisFrame into a normalized vector
-        //inputThisFrame.normalized - gives us the normalized vector, without changing the vector itself
-        
-        movementThisFrame = new();
-
-        movementThisFrame.x = inputThisFrame.x;
-        movementThisFrame.z = inputThisFrame.y;
-
-        float speedThisFrame = walkSpeed;
-
-        if (Input.GetButton("Sprint"))
-        {
-            speedThisFrame = runSpeed;
-        }
-        if (Input.GetButton("Crouch"))
-        {
-            speedThisFrame = crouchSpeed;
-        }
-        
-        movementThisFrame = TransformDirection(movementThisFrame);
-
-        if (inputThisFrame.magnitude > 0 && ValidateDirection(movementThisFrame))
-        {
-            horizontalSpeed = Mathf.MoveTowards(horizontalSpeed, speedThisFrame, runSpeed * Time.deltaTime);
-        }
-        else
-        {
-            horizontalSpeed = Mathf.MoveTowards(horizontalSpeed, 0, runSpeed * Time.deltaTime);
-        }
-
-        movementThisFrame *= horizontalSpeed;
-
-        verticalSpeed -= gravity * Time.deltaTime;
-
-        if (IsGrounded())
-        {
-            verticalSpeed = Mathf.Clamp(verticalSpeed, 0, float.PositiveInfinity);
-            if (Input.GetButton("Jump"))
-            {
-                verticalSpeed = jumpPower;
-            }
-        }
-
-        movementThisFrame.y = verticalSpeed;
-
-        Move(movementThisFrame);     
+        //inputThisFrame.normalized - gives us the normalized vector, without changing the vector itself  
     }
 
     protected virtual void Move(Vector3 direction)
@@ -170,6 +301,4 @@ public class CustomController : MonoBehaviour
         }
         return false;
     }
-
-
 }
