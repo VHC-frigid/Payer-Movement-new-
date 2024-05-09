@@ -6,7 +6,7 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class CustomController : MonoBehaviour
+public class CustomController : CombatAgent
 {
     public enum State
     {
@@ -300,5 +300,11 @@ public class CustomController : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    protected override void EndOfLife()
+    {
+        //put gameover behaviour in here
+        Debug.Log("Player has died");
     }
 }
