@@ -18,6 +18,9 @@ public class CustomController : CombatAgent
 
     }
 
+    [SerializeField] private float staminaCurrent, staminaMax = 100, staminaRunCost = 10, staminaRechargeRate = 20, staminaRechargeDelay = 1.5f;
+    private float staminaTimeLastUsed;
+
     [SerializeField] private State currentState;
 
     [SerializeField] private float walkSpeed;
@@ -41,17 +44,26 @@ public class CustomController : CombatAgent
 
     private CameraSwapper cameraSwapper;
 
+    private GrappleLine grappleRenderer;
+
     //hold on to our momentum values
     private float horizontalSpeed, verticalSpeed;
 
     private Vector2 inputThisFrame = new Vector2();
     private Vector3 movementThisFrame = new Vector3();
 
+    private PlayerUi playerUI;
+
     // Start is called before the first frame update
-    void Start()
+    protected override void Start()
     {
+        //do the Stat behaviour from my pearnt
+        base.Start();
         rb = GetComponent<Rigidbody>();
         cameraSwapper = GetComponent<CameraSwapper>();
+        grappleRenderer = GetComponentInChildren<GrappleLine>();
+        playerUI = FindObjectOfType<PlayerUi>();
+        staminaCurrent = staminaMax;
         NextState();
     }
 
@@ -128,7 +140,7 @@ public class CustomController : CombatAgent
 
             float speedThisFrame = walkSpeed;
 
-            if (Input.GetButton("Sprint"))
+            if (Input.GetButton("Sprint") && TryToUseStamina(staminaRunCost * Time.deltaTime))
             {
                 speedThisFrame = runSpeed;
             }
@@ -198,14 +210,25 @@ public class CustomController : CombatAgent
     IEnumerator GrappleState()
     {
 
+        grappleRenderer.StartGrapple(grapplePoint);
+        Vector3 grappleDirecion = grapplePoint - transform.position;
+        grappleDirecion.Normalize();
         while (currentState == State.Grapple)
         {
+            currentGrappleSpeed = Mathf.Clamp(currentGrappleSpeed + maxGrappleSpeed * Time.deltaTime, 0, maxGrappleSpeed);
 
-
+            if (Vector3.Distance(grapplePoint, transform.position) < 2f || Input.GetButtonUp("Grapple"))
+            {
+                EndGrapple();
+            }
+            else
+            {
+                Move(grappleDirecion * currentGrappleSpeed);
+            }
 
             yield return null;
         }
-
+        grappleRenderer.EndGrapple();
         NextState();
     }
 
@@ -217,6 +240,18 @@ public class CustomController : CombatAgent
         inputThisFrame = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         inputThisFrame.Normalize(); //changes inputThisFrame into a normalized vector
         //inputThisFrame.normalized - gives us the normalized vector, without changing the vector itself  
+        if (Input.GetButtonDown("Grapple"))
+        {
+            TryToGrapple();
+        }
+        //if the current time has surpased the last used time and the delay...
+        if (Time.time > staminaTimeLastUsed + staminaRechargeDelay)
+        {
+            staminaCurrent = Mathf.Clamp(staminaCurrent + staminaRechargeRate * Time.deltaTime, 0, staminaMax);
+        }
+
+        // current/max = a percent of max, between 0 and 1
+        playerUI.UpdateHUD(healthCurrent / healthMax, staminaCurrent / staminaMax);
     }
 
     protected virtual void Move(Vector3 direction)
@@ -307,4 +342,49 @@ public class CustomController : CombatAgent
         //put gameover behaviour in here
         Debug.Log("Player has died");
     }
+
+    #region Grapple methods
+
+    private void TryToGrapple()
+    {
+        grapplePoint = GetComponent<Grapple>().TryToGrapple();
+        if (grapplePoint != Vector3.zero)
+        {
+            StartGrapple();
+        }
+    }
+
+    private void StartGrapple()
+    {
+        verticalSpeed = 0;
+        horizontalSpeed = 0;
+        ChangeState(State.Grapple);
+    }
+
+    private Vector3 externalVelocity = Vector3.zero;
+
+    private void EndGrapple()
+    {
+        grapplePoint = Vector3.zero;
+        currentGrappleSpeed = 0;
+        externalVelocity = rb.velocity;
+        //rb.velocity = Vector3.zero;
+        //ChangeState(State.Idel);
+        ChangeState(State.Jump);
+    }
+
+    #endregion
+
+    public bool TryToUseStamina(float cost)
+    {
+        if(staminaCurrent == 0)
+        {
+            return false;
+        }
+
+        staminaCurrent = Mathf.Clamp(staminaCurrent - cost, 0, staminaMax);
+        staminaTimeLastUsed = Time.time;
+        return true;
+    }
+
 }

@@ -15,7 +15,7 @@ public abstract class EnemyBase : CombatAgent
 
     protected EnemyGun myGun;
 
-    protected virtual void Start()
+    protected override void Start()
     {
         playerTransform = FindObjectOfType<CustomController>().transform;
         myGun =  GetComponentInChildren<EnemyGun>();

@@ -10,6 +10,11 @@ public abstract class CombatAgent : MonoBehaviour
     //the largest amount of health allowed
     [SerializeField] protected float healthMax;
 
+    protected virtual void Start()
+    {
+        healthCurrent = healthMax;
+    }
+
     public void TakeDamage(float damage)
     {
         healthCurrent -= damage;
