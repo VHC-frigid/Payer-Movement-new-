@@ -14,12 +14,14 @@ public class GameManager : MonoBehaviour
     public static GameState currentState = GameState.Play;
 
     private PauseUI pauseUI;
+    private CataloueScreen catalogueScreen;
 
     // Start is called before the first frame update
     void Start()
     {
         //find our PauseUI script and save it in a variable
         pauseUI = FindObjectOfType<PauseUI>();
+        catalogueScreen = FindObjectOfType<CataloueScreen>();
         ApplyGameState();
     }
 
@@ -65,6 +67,7 @@ public class GameManager : MonoBehaviour
             
             case GameState.Play:
                 pauseUI.SetPauseScreen(false);
+                catalogueScreen.CloseScreen();
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
                 Time.timeScale = 1;

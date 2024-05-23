@@ -27,6 +27,11 @@ public class FirstPersonCamera : MonoBehaviour
     void Update()
     {
 
+        if (GameManager.currentState != GameState.Play)
+        {
+            return;
+        }
+        
         currentHorizontalRotation += Input.GetAxis("Mouse X") * sensitivity;
         currentVerticalRotation -= Input.GetAxis("Mouse Y") * sensitivity;
         currentVerticalRotation = Mathf.Clamp(currentVerticalRotation, verticalRotationMin, verticalRotationMax);

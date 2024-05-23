@@ -12,9 +12,34 @@ public class Scannable : MonoBehaviour
         Item
     }
 
-    [SerializeField] private Category category;
+    [SerializeField] private Category scanCategory;
     [SerializeField] private string scanName;
     [SerializeField] private string scanDescription;
+
+    //A property allows us to GET a copy of information without letting us SET it
+    public string ScanName
+    {
+        get
+        {
+            return scanName;
+        }
+    }
+
+    public string ScanDescription
+    {
+        get
+        {
+            return scanDescription;
+        }
+    }
+
+    public Category ScanCategory
+    {
+        get
+        {
+            return scanCategory;
+        }
+    }
 
     private static Scanpopup scanPopup;
 
@@ -29,5 +54,6 @@ public class Scannable : MonoBehaviour
     public void Scan()
     {
         FindObjectOfType<Scanpopup>().DisplayScan(scanName, scanDescription);
+        Catalog.CheckNewScan(this);
     }
 }

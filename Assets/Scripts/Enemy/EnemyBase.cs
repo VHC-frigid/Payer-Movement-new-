@@ -24,7 +24,7 @@ public abstract class EnemyBase : CombatAgent
     protected virtual void Update()
     {
         isAttacking = false;
-        Debug.Log(Vector3.Distance(playerTransform.position, transform.position).ToString());
+        //Debug.Log(Vector3.Distance(playerTransform.position, transform.position).ToString());
         if (Vector3.Distance(playerTransform.position,transform.position) < aggroRange)
         {
             DoAttack();
