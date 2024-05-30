@@ -7,6 +7,7 @@ public class PlayerUi : MonoBehaviour
 {
 
     [SerializeField] private Image healthBar;
+    [SerializeField] private RectTransform healthBarBG;
     [SerializeField] private Image staminaBar;
 
     [SerializeField] private Gradient healthGradient;
@@ -30,6 +31,11 @@ public class PlayerUi : MonoBehaviour
         healthBar.fillAmount = healthPercent;
         staminaBar.fillAmount = staminaPercent;
         healthBar.color = healthGradient.Evaluate(healthPercent);
+    }
+
+    public void SetNewSize(float healthMax)
+    {
+        healthBarBG.sizeDelta = new(healthMax * 25f, healthBarBG.sizeDelta.y);
     }
 
 }

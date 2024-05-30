@@ -21,6 +21,13 @@ public class CataloueScreen : MonoBehaviour
         AddItemFromCatalogue(list);
     }
 
+    public void UpdateCatalogueUI(int category)
+    {
+        ClearCurrentUI();
+        List<Scannable> list = Catalog.ScannedItems;
+        AddItemFromCatalogue(list, category);
+    }
+
     private void ClearCurrentUI()
     {
         for (int i = 0; i < content.childCount; i++)
@@ -33,6 +40,17 @@ public class CataloueScreen : MonoBehaviour
     {
         foreach (Scannable item in catalogue)
         {
+            AddItem(item);
+        }
+    }
+
+    private void AddItemFromCatalogue(List<Scannable> catalogue, int category)
+    {
+        foreach (Scannable item in catalogue)
+        {
+            if ((int)item.ScanCategory != category)
+                continue;
+
             AddItem(item);
         }
     }

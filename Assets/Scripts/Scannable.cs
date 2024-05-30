@@ -13,8 +13,8 @@ public class Scannable : MonoBehaviour
     }
 
     [SerializeField] private Category scanCategory;
-    [SerializeField] private string scanName;
-    [SerializeField] private string scanDescription;
+    [SerializeField] protected string scanName;
+    [SerializeField] protected string scanDescription;
 
     //A property allows us to GET a copy of information without letting us SET it
     public string ScanName

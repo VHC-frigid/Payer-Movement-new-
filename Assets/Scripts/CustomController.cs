@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
@@ -64,6 +65,7 @@ public class CustomController : CombatAgent
         grappleRenderer = GetComponentInChildren<GrappleLine>();
         playerUI = FindObjectOfType<PlayerUi>();
         staminaCurrent = staminaMax;
+        playerUI.SetNewSize(healthMax);
         NextState();
     }
 
@@ -387,4 +389,28 @@ public class CustomController : CombatAgent
         return true;
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.transform.TryGetComponent<Item>(out Item item))
+        {
+            switch (item.ItemType)
+            {
+                case Item.Type.Heal:
+                    Heal(0.2f);
+                    break;
+                case Item.Type.UpgradeHealth:
+                    healthMax += 3f;
+                    healthCurrent = healthMax;
+                    playerUI.SetNewSize(healthMax);
+                    break;
+                case Item.Type.UpgradeGun:
+                    break;
+                case Item.Type.UpgradeStamina:
+                    break;
+                case Item.Type.UpgradeGrapple:
+                    break;
+            }
+            Destroy(item.gameObject);
+        }
+    }
 }
