@@ -14,9 +14,12 @@ public class PlayerGun : HitScanFromCamera
 
         if (hit.collider)
         {
+
+            Debug.Log($"Shot {hit.collider.gameObject.name}");
             //check the hit for a combat agent
             if (hit.collider.TryGetComponent<CombatAgent>(out CombatAgent agent))
             {
+                Debug.Log($"Shot agent {agent.gameObject.name} for {damage} damage");
                 //make them take damage if found
                 agent.TakeDamage(damage);
             }
