@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public enum GameState
 {
@@ -11,10 +13,12 @@ public enum GameState
 public class GameManager : MonoBehaviour
 {
     //this is the urrent state of th game
-    public static GameState currentState = GameState.Play;
+    public static GameState currentState = GameState.MainMenu;
 
     private PauseUI pauseUI;
     private CataloueScreen catalogueScreen;
+
+    public GameObject mainMenuP;
 
     // Start is called before the first frame update
     void Start()
@@ -29,11 +33,32 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.C))
         {
             TogglePause();
         }
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(0);
+        }
+    }
+
+    public void StartGame()
+    {
+        currentState = GameState.Play;
+        mainMenuP.SetActive(false);
+        ApplyGameState();
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
     
     public void TogglePause()
@@ -63,6 +88,10 @@ public class GameManager : MonoBehaviour
         switch (currentState)
         {
             case GameState.MainMenu:
+                mainMenuP.SetActive(true);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                Time.timeScale = 0;
                 break;
             
             case GameState.Play:

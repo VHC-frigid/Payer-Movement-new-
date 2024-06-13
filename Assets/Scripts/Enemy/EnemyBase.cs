@@ -21,6 +21,8 @@ public abstract class EnemyBase : CombatAgent
     [Tooltip("The minimum distance from the player before the enemy attacks")]
     [SerializeField] protected float aggroRange;
 
+
+
     protected Transform playerTransform;
 
     //is th enemy currently attacking?
@@ -38,8 +40,13 @@ public abstract class EnemyBase : CombatAgent
     protected virtual void Update()
     {
         isAttacking = false;
+        float range = aggroRange;
+        if (Input.GetButton("crouch"))
+        {
+            range *= 0.5f;
+        }
         //Debug.Log(Vector3.Distance(playerTransform.position, transform.position).ToString());
-        if (Vector3.Distance(playerTransform.position,transform.position) < aggroRange)
+        if (Vector3.Distance(playerTransform.position,transform.position) < range)
         {
             DoAttack();
         }

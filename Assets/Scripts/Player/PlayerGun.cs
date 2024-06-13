@@ -6,6 +6,17 @@ public class PlayerGun : HitScanFromCamera
 {
     [SerializeField] private float damage;
     [SerializeField] private float cost;
+    
+    public float fireRate = 1f;
+    private float nextTimeToFire;
+
+    private CustomController player;
+
+    protected override void Start()
+    {
+        base.Start();
+        player = GetComponent<CustomController>();
+    }
 
     private void Shoot()
     {
@@ -24,14 +35,17 @@ public class PlayerGun : HitScanFromCamera
                 agent.TakeDamage(damage);
             }
         }
-
+        nextTimeToFire = Time.time + fireRate;
     }
 
     private void Update()
     {
-        if (Input.GetButtonDown("Shoot"))
+        if (Input.GetButtonDown("Shoot") && Time.time > nextTimeToFire)
         {
-            Shoot();
+            if (player.TryToUseStamina(cost))
+            {
+                Shoot();
+            } 
         }
     }
 }
