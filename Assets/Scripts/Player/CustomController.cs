@@ -55,6 +55,8 @@ public class CustomController : CombatAgent
 
     private PlayerUi playerUI;
 
+    public GameObject GOPanel;
+
     // Start is called before the first frame update
     protected override void Start()
     {
@@ -342,7 +344,10 @@ public class CustomController : CombatAgent
     protected override void EndOfLife()
     {
         //put gameover behaviour in here
-        Debug.Log("Player has died");
+        GOPanel.SetActive(true);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        Time.timeScale = 0;
     }
 
     #region Grapple methods

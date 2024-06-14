@@ -41,7 +41,7 @@ public abstract class EnemyBase : CombatAgent
     {
         isAttacking = false;
         float range = aggroRange;
-        if (Input.GetButton("crouch"))
+        if (Input.GetButton("Crouch"))
         {
             range *= 0.5f;
         }

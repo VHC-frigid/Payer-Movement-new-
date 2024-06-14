@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     private CataloueScreen catalogueScreen;
 
     public GameObject mainMenuP;
+    public GameObject GOPanel;
 
     // Start is called before the first frame update
     void Start()
@@ -33,7 +34,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
-        if (Input.GetKeyDown(KeyCode.C))
+        if (Input.GetKeyDown(KeyCode.Q))
         {
             TogglePause();
         }
@@ -46,11 +47,23 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             SceneManager.LoadScene(0);
+            currentState = GameState.MainMenu;
+            ApplyGameState();
         }
     }
 
+
+    public void MainMenu()
+    {
+        currentState = GameState.MainMenu;
+        mainMenuP.SetActive(true);
+        GOPanel.SetActive(false);
+        ApplyGameState();
+    }
+    
     public void StartGame()
     {
+        SceneManager.LoadScene(0);
         currentState = GameState.Play;
         mainMenuP.SetActive(false);
         ApplyGameState();
@@ -96,6 +109,7 @@ public class GameManager : MonoBehaviour
             
             case GameState.Play:
                 pauseUI.SetPauseScreen(false);
+                mainMenuP.SetActive(false);
                 catalogueScreen.CloseScreen();
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
