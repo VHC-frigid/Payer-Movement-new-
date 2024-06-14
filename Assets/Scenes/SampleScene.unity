@@ -5982,7 +5982,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: MInd Monster
+  m_Text: Mind Monster
 --- !u!222 &1251099921
 CanvasRenderer:
   m_ObjectHideFlags: 0
