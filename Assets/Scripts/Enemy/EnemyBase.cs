@@ -21,8 +21,6 @@ public abstract class EnemyBase : CombatAgent
     [Tooltip("The minimum distance from the player before the enemy attacks")]
     [SerializeField] protected float aggroRange;
 
-
-
     protected Transform playerTransform;
 
     //is th enemy currently attacking?
